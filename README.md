@@ -53,6 +53,70 @@
 // TODO Add the notes
 ```
 
+#### Yarn
+
+[Apache Hadoop YARN: Yet Another Resource Negotiator](https://www.sics.se/~amir/id2221/papers/2013%20-%20Apache%20Hadoop%20YARN%20-%20Yet%20Another%20Resource%20Negotiator%20(SoCC).pdf)
+
+```
+// TODO Wait to read
+```
+
+### Lock Service
+
+#### Chubby
+
+[The Chubby lock service for loosely-coupled distributed systems](http://static.googleusercontent.com/media/research.google.com/zh-CN//archive/chubby-osdi06.pdf)
+
+```
+// TODO Wait to read
+```
+
+### 一致性(Consensus)
+
+#### Raft
+
+[In Search of an Understandable Consensus Algorithm(Extended Version)](https://raft.github.io/raft.pdf)
+
+```
+// TODO Add the notes
+```
+
+#### Zookeeper
+
+[ZooKeeper: Wait-free coordination for Internet-scale systems](http://static.cs.brown.edu/courses/csci2270/archives/2012/papers/replication/hunt.pdf)
+
+```
+// TODO Wait to read
+```
+
+#### Paxos
+
+* [Paxos Made Live - An Engineering Perspective](http://static.googleusercontent.com/media/research.google.com/zh-CN//archive/paxos_made_live.pdf)
+* [The Part-Time Parliament](http://research.microsoft.com/en-us/um/people/lamport/pubs/lamport-paxos.pdf)
+* [Paxos Made Simple](http://research.microsoft.com/en-us/um/people/lamport/pubs/paxos-simple.pdf)
+
+```
+// TODO Wait to read
+```
+
+###  Storage
+
+#### Dynamo
+
+[Dynamo: Amazon’s Highly Available Key-value Store](http://s3.amazonaws.com/AllThingsDistributed/sosp/amazon-dynamo-sosp2007.pdf)
+
+```
+// TODO Wait to read
+```
+
+#### Spanner
+
+[Spanner: Google’s Globally-Distributed Database](http://static.googleusercontent.com/media/research.google.com/zh-CN//archive/spanner-osdi2012.pdf)
+
+```
+// TODO Wait to read
+```
+
 ## 虚拟化(Virtualization)
 
 ### 虚拟机管理器(Hypervisor)
@@ -78,6 +142,15 @@
 #### Google Native Client
 
 [Native Client: A Sandbox for Portable, Untrusted x86 Native Code](http://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/34913.pdf)
+
+```
+// TODO Add the notes
+```
+
+#### mbox
+
+* [Practical and effective sandboxing for non-root users](https://people.csail.mit.edu/nickolai/papers/kim-mbox.pdf)
+* [Open source in GitHub](https://github.com/tsgates/mbox)
 
 ```
 // TODO Add the notes
