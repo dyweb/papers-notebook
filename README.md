@@ -1,6 +1,8 @@
 # 论文笔记
 
-## TOC
+这个 repo 希望能够记录自己阅读论文的过程，其中的论文一部分来自于上课需要阅读的论文，这部分会比较偏安全和虚拟化。还有一部分论文是自己感兴趣，想去了解的，这部分可能比较偏虚拟化和分布式。论文笔记希望能够记录自己在读论文的时候的想法，其中包括但不限于论文的大致 idea，实现方式，以及自己对论文的评价等等。希望能够把每一篇论文的笔记限制在 1000 字以内。
+
+## 目录(TOC)
 
    * [论文笔记](#论文笔记)
       * [分布式(Distributed System)](#分布式distributed-system)
@@ -15,7 +17,7 @@
             * [Raft](#raft)
             * [Zookeeper](#zookeeper)
             * [Paxos](#paxos)
-         * [Storage](#storage)
+         * [存储(Storage)](#存储storage)
             * [Dynamo](#dynamo)
             * [Spanner](#spanner)
       * [虚拟化(Virtualization)](#虚拟化virtualization)
@@ -110,7 +112,7 @@
 // TODO Wait to read
 ```
 
-###  Storage
+### 存储(Storage)
 
 #### Dynamo
 
@@ -152,11 +154,14 @@
 
 #### Google Native Client
 
-[Native Client: A Sandbox for Portable, Untrusted x86 Native Code](http://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/34913.pdf)
+* [Native Client: A Sandbox for Portable, Untrusted x86 Native Code](http://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/34913.pdf)
+* [论文笔记 in GitHub](https://github.com/gaocegege/NaCl-note)
 
-```
-// TODO Add the notes
-```
+这篇论文是在 CSP 课上读的， 因为需要做分享，所以读的相比于其他论文要仔细一些，之前在阅读的时候就写了一些阅读笔记，比较冗长，这里写一些这篇论文的大概 idea 的介绍，以及一些自己的评论。
+
+Google Native Client(NaCl)，简单来说是一个在浏览器里跑 Native 代码的技术。类比技术是微软<del>臭名昭著</del>的 ActiveX。相比于 ActiveX 那种毫无安全性可言的实现，NaCl 使用了一些自己改良过的 Software Fault Isolation(SFI) 的技术，结合了 ptrace 这样的 System Call Interception 的工具，来实现了在浏览器里安全运行 Native 代码的功能。从实现角度来看，是先对代码进行静态检查，保证代码符合 NaCl 制定的一些规则，然后再把程序运行在一个沙箱内，Native 代码所有跟外界的通讯，包括系统调用，都会被封装或者拦截，使用这样的方式来实现了对 Native 代码的安全隔离。在 2009 年的时候，Google 组织了一个 Native Client Security Contest，鼓励开发者寻找 NaCl 的漏洞，最终发现了 20 多个漏洞但是没有一个可以从根本上破坏 NaCl 的保护。目前 Google Chrome 浏览器仍然支持以这样的方式来运行 Native 代码，只不过好像没有多少人在用的样子。Demo 很容易运行，感兴趣可以试一下，很简单就可以实现从 CPP 代码到 Javascript 代码的通信。
+
+为了提高浏览器段代码运行的效率，还有另外一个流派的做法，那就是 [asm.js](http://asmjs.org/)，它的实现思路跟 NaCl 完全不一样，并不会在浏览器里执行 Native 代码，因此不会有这么多安全方面的问题需要考虑，而是通过修改 LLVM 的那一套工具链，把 Native 代码编译成 Javascript 的一个子集，运行这个子集的 Javascript 代码。这样的实现最高可以只比 Native 应用慢一倍，虽然不如 NaCl 媲美原生应用，但是也可以接受了。这是 Firefox 浏览器的路子。
 
 #### mbox
 
