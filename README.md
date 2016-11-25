@@ -5,6 +5,7 @@
 ## 目录(TOC)
 
    * [论文笔记](#论文笔记)
+      * [目录(TOC)](#目录toc)
       * [分布式(Distributed System)](#分布式distributed-system)
          * [调度器(Scheduler)](#调度器scheduler)
             * [Omega](#omega)
@@ -35,8 +36,12 @@
       * [安全(Security)](#安全security)
          * [虚拟机安全(Virtulization, Security)](#虚拟机安全virtulization-security)
             * [CloudVisor](#cloudvisor)
+         * [Taint Tracing](#taint-tracing)
+            * [TaintDroid](#taintdroid)
          * [ROP](#rop)
             * [Hacking Blind](#hacking-blind)
+
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 ## 分布式(Distributed System)
 
@@ -201,6 +206,16 @@ Google Native Client(NaCl)，简单来说是一个在浏览器里跑 Native 代�
 #### CloudVisor
 
 [CloudVisor: Retrofitting Protection of Virtual Machines in Multi-tenant Cloud with Nested Virtualization](https://www.sigops.org/sosp/sosp11/current/2011-Cascais/printable/15-zhang.pdf)
+
+```
+// TODO Add the notes
+```
+
+### Taint Tracing
+
+#### TaintDroid
+
+[TaintDroid: An Information-Flow Tracking System for Realtime Privacy Monitoring on Smartphones](http://www.appanalysis.org/tdroid10.pdf)
 
 ```
 // TODO Add the notes
