@@ -141,15 +141,17 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 #### Xen
 
-[Xen and the Art of Virtualization](http://www.cl.cam.ac.uk/research/srg/netos/papers/2003-xensosp.pdf)
+* [Xen and the Art of Virtualization](http://www.cl.cam.ac.uk/research/srg/netos/papers/2003-xensosp.pdf)
+* [CSP 课堂笔记之 Hypervisor](http://gaocegege.com/Blog/csp/xen-kvm)
 
-```
-// TODO Add the notes
-```
+Xen 是非常著名的 Hypervisor，它提出了 para-virtualization 的想法。之前实现虚拟机，都是通过 full-virtualization 的方式，但是那个时候的 X86 其实并不能很好地支持 full-virtualization。举个例子，有些指令原本是应该在 VMM 中被执行的，但是有时会因为指令在不同 ring 有不同的表现，因此并不能成功地 trap 到 VMM 中。为了更加优雅地解决这样的问题，Xen 引入了 hypercall，修改了 Guest 的 OS。通过另外的方式来解决这个问题。
+
+虚拟化最主要的资源是 CPU，Memory 和 IO，Xen 对于三者都有一些比较有趣的地方。其中我觉得最有趣的是对于设备的支持，引入了 Domain 0，前后端驱动的设计让人觉得很自然，而且也避免了把驱动放在 VMM 里，会因为驱动 bug 把 VMM 弄崩的可能。
 
 #### kvm
 
-[kvm: the Linux Virtual Machine Monitor](https://www.kernel.org/doc/ols/2007/ols2007v1-pages-225-230.pdf)
+* [kvm: the Linux Virtual Machine Monitor](https://www.kernel.org/doc/ols/2007/ols2007v1-pages-225-230.pdf)
+* [CSP 课堂笔记之 Hypervisor](http://gaocegege.com/Blog/csp/xen-kvm)
 
 ```
 // TODO Add the notes
