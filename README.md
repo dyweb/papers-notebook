@@ -217,11 +217,12 @@ Google Native Client(NaCl)，简单来说是一个在浏览器里跑 Native 代�
 
 #### TaintDroid
 
-[TaintDroid: An Information-Flow Tracking System for Realtime Privacy Monitoring on Smartphones](http://www.appanalysis.org/tdroid10.pdf)
+* [TaintDroid: An Information-Flow Tracking System for Realtime Privacy Monitoring on Smartphones](http://www.appanalysis.org/tdroid10.pdf)
+* [Realtime Privacy Monitoring on Smartphones](http://www.appanalysis.org/)
 
-```
-// TODO Add the notes
-```
+Taint 分析，就是指把一些敏感数据标注出来，在程序执行的过程中确保这些被标注的敏感数据不会被泄露出去的技术。TaintDroid 是一个在 Andriod 做 Taint 分析的工具，之前的 Taint 分析工具，overhead 非常大，而 TaintDroid 通过分层的思想，在不同层做不同粒度的 Taint 跟踪，大大降低了运行时的 overhead。
+
+论文有一个配套的 demo，是可以运行的，感兴趣的话可以自己试试看，这里也有一个 [Demo 视频](https://www.youtube.com/watch?v=qnLujX1Dw4Y)。很有趣的是这篇论文是 Intel Labs 有参与的，不是很懂他们怎么会想到做这样的事情。
 
 ### ROP
 
