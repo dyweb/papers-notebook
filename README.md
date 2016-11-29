@@ -228,8 +228,9 @@ Taint 分析，就是指把一些敏感数据标注出来，在程序执行的�
 
 #### Hacking Blind
 
-[Hacking Blind](www.scs.stanford.edu/~sorbo/brop/bittau-brop.pdf)
+* [Hacking Blind](www.scs.stanford.edu/~sorbo/brop/bittau-brop.pdf)
+* [【转载】Blind Return Oriented Programming (BROP) Attack - 攻击原理](http://ytliu.info/blog/2014/09/28/blind-return-oriented-programming-brop-attack-gong-ji-yuan-li/)
 
-```
-// TODO Add the notes
-```
+这篇论文看上去就很酷，实现很让人亮眼。最简单的 ROP，就是寻找一个个的 gadget，然后把 gadget 连接起来。然后让控制流走到这些 gadget 里，就 OK 了。但是这篇论文是如何在远程来劫持控制流，来实现 ROP 攻击。攻击者不了解远程的系统，因此首先系统要有一个已知的 stack overflow 的漏洞，然后要求攻击的进程在死了后会重启，而且 ASLR 后的地址不变。
+
+其实条件是很苛刻的，而且也不懂为什么一个攻击者可以在不了解远程系统的同时知道系统的 stack overflow 漏洞。整体攻击的过程，是先 Dump 服务器的内存，然后再进行常规的 ROP，其中 Dump 内存的操作非常精巧，感觉只有 ROP 高级玩家才能想出这样的做法，具体可以看看上面链接的论文，是我们学院 IPADS 实验室的一个学长写的，很清楚。
