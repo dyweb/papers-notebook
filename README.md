@@ -9,8 +9,8 @@
       * [分布式(Distributed System)](#分布式distributed-system)
          * [调度器(Scheduler)](#调度器scheduler)
             * [Omega](#omega)
-            * [Borg](#borg)
             * [Mesos](#mesos)
+            * [Borg](#borg)
             * [Yarn](#yarn)
          * [Lock Service](#lock-service)
             * [Chubby](#chubby)
@@ -47,6 +47,18 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 ### 调度器(Scheduler)
 
+在我看来，分布式是研究如何让程序能够在多台机器上运行拥有更好的性能的一个方向。那如果要实现这一点，调度很关键。
+
+目前我读过的与分布式调度器有关的论文有 Mesos, Omega, Yarn 和 Borg。这其中 Mesos 是最早的，它来自伯克利大学。其最亮的地方在于两层调度的框架，使得调度跟框架是松耦合的。目前很多公司都是在用它的，而且有很多基于 Mesos 的创业公司，比如 Mesosphere 等等。Omega 跟 Mesos 的第二作者是一个人。Omega 具体来说也不知道算是谁写的，应该算是大学和谷歌一起做的研究。Omega 发表在 EuroSys'13 上，是在基于 Mesos 的基础上，提出了一种完全并行的调度的解决方案，能够在调度上有更好的性能。不过论文是采取的模拟实验来进行验证的，不知道是否有生产上的使用。Borg 是发表在 EuroSys'15 上的，是谷歌真正一直在使用的集群管理工具。可以说谷歌为什么可以用廉价的机器来达到很高的可用性，有很大一部分是因为 Borg。Borg 和 Omega 是不开源的，而 Mesos 是开源的，不过 Borg 有一个开源的继任者，就是目前大名鼎鼎的 Kubernetes。Kubernetes 下面用 Docker Conatainer，而不是 Linux 内核的那些用来做进程级别的性能隔离的特性来实现的。不过最近 Kubernetes 似乎在跟 Docker 撕逼，因为 Docker 公司的一些强势吧，可能之后不会只支持 Docker Conatiner。Kubernetes 在很长的时间内都不是 production ready 的，只能支持 100 个节点，跟 Borg 的 10K 完全没法比，不知道现在是什么情况。
+
+#### Mesos
+
+[Mesos: A Platform for Fine-Grained Resource Sharing in the Data Center](https://people.eecs.berkeley.edu/~alig/papers/mesos.pdf)
+
+```
+// TODO Add the notes
+```
+
 #### Omega
 
 [Omega: flexible, scalable schedulers for large compute clusters](http://web.eecs.umich.edu/~mosharaf/Readings/Omega.pdf)
@@ -59,17 +71,13 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 [Large-scale cluster management at Google with Borg](http://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/43438.pdf)
 
-```
-// TODO Add the notes
-```
+Borg 是谷歌发表在 EuroSys'15 上的一篇文章，讲述了其内部是如何做集群管理的。Borg 是我看过的第一篇关于集群管理的论文。首先介绍下 Borg 的特点，Borg 是一个用来做集群管理的工具，它的目标就是让跑在它上面的应用能够拥有很好的可用性和可靠性的同时，能够提高机器的利用率，而且这些是在一个非常大规模的机器环境下。在 Borg 被设计的时候，还没有对虚拟化的硬件支持，也就是 Intel VT-x 等等那些硬件特性，所以 Borg 是使用了进程级别的隔离手段，也就是 Control Group。
 
-#### Mesos
+Borg 的架构其实还挺简单的，是比较经典的 Master/Slave 架构，其中在 Master 部分，有两个抽象的进程，一个是 Borg Master，一个是 Borg Scheduler。Borg Master 是有5个备份的，每个都会在内存里维护集群里所有对象的状态。他们5个组成了一个小集群，用 Paxos 算法做一致性的，会选举出一个 leader 来处理请求，这点是之前 Kubernetes 做不到的。
 
-[Mesos: A Platform for Fine-Grained Resource Sharing in the Data Center](https://people.eecs.berkeley.edu/~alig/papers/mesos.pdf)
+调度器方面的实现比较简单，就是一个队列，根据优先级做 round-robin。这里读起来感觉没什么新意，就不多说了。调度的平均时间大概是 25s，其中 80% 的时间在下载包。谷歌也是实诚，下载安装包的时间都算到调度里面去。
 
-```
-// TODO Add the notes
-```
+谷歌写的论文一向是简单易懂，特别良心的。所以要是对集群感兴趣，可以去看下这篇论文，花两三个小时就能看完了。
 
 #### Yarn
 
