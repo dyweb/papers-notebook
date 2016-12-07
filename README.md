@@ -209,9 +209,13 @@ System Call Interposition，顾名思义，就是拦截和过滤系统调用的�
 
 链接中的第一篇论文是 1996 年发表的，是 system call interposition 方向上最经典的论文，它提出了一个系统，Janus。这个工具可以根据用户定义的 policy 来对应用的请求调用进行过滤，后面的两篇都是后续的关于 Janus 的论文。
 
-```
-// TODO Add the notes
-```
+在那个时候，互联网很流行，在互联网上获得的内容，可以直接用本地的 helper application 打开。因为内容本身是不可信的，所以这样的一种模式连带着 helper application 也是不可信的，因此 Janus 希望对这样的应用进行限制和隔离，使得应用具有最小的特权，当其被恶意程序攻击后，不会影响整个操作系统。
+
+Janus 的目标有三点，第一个是安全不多说，第二个是灵活，就是要求对系统调用的限制可以达到参数级别，比如 open 在某些参数时可以被调用，其他就不可以，还有就是可配置，允许为不同应用配置不同的策略。
+
+它的实现比较简单，是借助了内核中的 ptrace，然后实现了一个 kernel module 以及一个用户态的 engine。在开始的时候，Janus 会先读取 policy 文件，然后会 fork 子进程，然后父进程会 select 关于子进程的各种事件。子进程会执行 helper app 的逻辑，当有了一个系统调用，会先给 Janus 的内核模块处理，内核模块会跟用户态的 engine 交互，确定请求是不是合法的，合法会交由内核去处理，否则会 deny 掉请求。
+
+下面的两篇论文中提到了一些关于 Janus 的缺点，包括 ptrace 和 Janus 本身的缺点，主要是涉及一些 system call 的监控问题，以及 deny 的方式问题，就不再说了，已经很长了。
 
 #### Ostia
 
@@ -226,6 +230,8 @@ System Call Interposition，顾名思义，就是拦截和过滤系统调用的�
 #### SFI
 
 * [Efficient Software-Based Fault Isolation](https://crypto.stanford.edu/cs155/papers/sfi.pdf)
+
+这篇文章是在 1993 年发表的，也正是这篇文章最早提出了 "sandboxing" 一词。
 
 ```
 // TODO Add the notes
