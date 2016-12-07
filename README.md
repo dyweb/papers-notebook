@@ -221,9 +221,11 @@ Janus 的目标有三点，第一个是安全不多说，第二个是灵活，�
 
 * [Ostia: A Delegating Architecture for Secure System Call Interposition](http://benpfaff.org/papers/ostia.pdf)
 
-```
-// TODO Add the notes
-```
+Ostia 是在 Janus 等等那一溜论文后面发表的，因此引用了 Janus 中提到的那三篇论文。它最大的贡献，在于提出了一种新的架构，然后解决了之前的基于 filter 的架构不能解决的问题。
+
+它跟 Janus 其实是一挂的工具，都是要在内核态修改一些东西来做的。但是两者的不同在于实现的架构，Janus 是在内核中要有一个负责 tracing 的模块，比如 ptrace。然后在用户态有一个 policy engine，两者会交互，其中是否 deny 请求的逻辑在 policy engine 中，而内核中的模块主要是做 process monitor 的。
+
+Ostia 的实现在我看来参考了虚拟化的一些思想，当一个系统调用到内核的时候，会回调在调用者用户态内存空间中的一个 handler，然后会转发给 agent，然后 agent 会负责校验权限和访问。具体的实现还在看。
 
 ### 软件故障隔离(Software-based Fault Isolation)
 
