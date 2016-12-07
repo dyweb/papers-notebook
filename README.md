@@ -4,12 +4,12 @@
 
 ## 目录(TOC)
 
-   * [论文笔记](#论文笔记)
+  * [论文笔记](#论文笔记)
       * [目录(TOC)](#目录toc)
       * [分布式(Distributed System)](#分布式distributed-system)
          * [调度器(Scheduler)](#调度器scheduler)
-            * [Omega](#omega)
             * [Mesos](#mesos)
+            * [Omega](#omega)
             * [Borg](#borg)
             * [Yarn](#yarn)
          * [Lock Service](#lock-service)
@@ -26,9 +26,18 @@
             * [Xen](#xen)
             * [kvm](#kvm)
          * [容器(Container)](#容器container)
-            * [Google Native Client](#google-native-client)
             * [mbox](#mbox)
+      * [沙箱(Sandboxing)](#沙箱sandboxing)
+         * [系统调用拦截(System Call Interposition)](#系统调用拦截system-call-interposition)
+            * [Janus](#janus)
+            * [Ostia](#ostia)
+         * [软件故障隔离(Software-based Fault Isolation)](#软件故障隔离software-based-fault-isolation)
+            * [SFI](#sfi)
+            * [Google Native Client](#google-native-client)
+            * [Language-Independent Sandboxing](#language-independent-sandboxing)
       * [系统(System)](#系统system)
+         * [文件系统(File System)](#文件系统file-system)
+            * [Optimistic Crash Consistency](#optimistic-crash-consistency)
          * [操作系统(Operating System)](#操作系统operating-system)
             * [Exokernel](#exokernel)
          * [CFI](#cfi)
@@ -167,6 +176,61 @@ Xen 是非常著名的 Hypervisor，它提出了 para-virtualization 的想法�
 
 ### 容器(Container)
 
+#### mbox
+
+* [Practical and effective sandboxing for non-root users](https://people.csail.mit.edu/nickolai/papers/kim-mbox.pdf)
+* [Open source in GitHub](https://github.com/tsgates/mbox)
+
+```
+// TODO Add the notes
+```
+
+## 沙箱(Sandboxing)
+
+* [Sandboxing in Linux: From Smartphone to Cloud](http://www.ijcaonline.org/archives/volume148/number8/borate-2016-ijca-911256.pdf)
+
+沙箱跟容器其实是有点血缘关系的，要做容器肯定要实现隔离，而沙箱就是专门做隔离的。之所以把他们两个分开介绍是因为沙箱本身是一个很复杂的方向，有很多的种类，而容器只是使用了沙箱技术中的某几种。
+
+沙箱技术大致可以被分为两类，其中第一类是基于隔离的沙箱，该类型的沙箱将应用的执行环境从操作系统中隔离出来，形成一个独立的执行环境。第二类是基于规则的沙箱，该类型的沙箱并不是完全关注于对于应用程序的隔离上，而是用规则的方式控制每个应用的权限，基于规则的沙箱之间可以分享操作系统的逻辑资源。
+
+我读的论文主要都是第一类的沙箱，其中主要的技术是 capabilities, system call interposition, software-based fault isolation 等。
+
+上面的链接是一个综述性质的文章，主要阐述了 Linux 平台上可以用来实现沙箱的内核 feature。它对沙箱的定义和功能介绍的比较简单易懂，不妨一读。
+
+###  系统调用拦截(System Call Interposition)
+
+System Call Interposition，顾名思义，就是拦截和过滤系统调用的技术。在沙箱的实现过程中，系统调用是一个很关键的部分。如何能够保证应用只能进行被授权的系统调用，是这个方向的研究做的事情。
+
+#### Janus
+
+* [A Secure Environment for Untrusted Helper Applications(Confining the Wily Hacker)](https://www.usenix.org/legacy/publications/library/proceedings/sec96/full_papers/goldberg/goldberg.pdf)
+* [Janus: an Approach for Confinement of Untrusted Applications](http://www2.eecs.berkeley.edu/Pubs/TechRpts/1999/CSD-99-1056.pdf)
+* [Traps and Pitfalls: Practical Problems in System Call Interposition Based Security Tools](http://www.isoc.org/isoc/conferences/ndss/03/proceedings/papers/11.pdf)
+
+链接中的第一篇论文是 1996 年发表的，是 system call interposition 方向上最经典的论文，它提出了一个系统，Janus。这个工具可以根据用户定义的 policy 来对应用的请求调用进行过滤，后面的两篇都是后续的关于 Janus 的论文。
+
+```
+// TODO Add the notes
+```
+
+#### Ostia
+
+* [Ostia: A Delegating Architecture for Secure System Call Interposition](http://benpfaff.org/papers/ostia.pdf)
+
+```
+// TODO Add the notes
+```
+
+### 软件故障隔离(Software-based Fault Isolation)
+
+#### SFI
+
+* [Efficient Software-Based Fault Isolation](https://crypto.stanford.edu/cs155/papers/sfi.pdf)
+
+```
+// TODO Add the notes
+```
+
 #### Google Native Client
 
 * [Native Client: A Sandbox for Portable, Untrusted x86 Native Code](http://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/34913.pdf)
@@ -178,16 +242,27 @@ Google Native Client(NaCl)，简单来说是一个在浏览器里跑 Native 代�
 
 为了提高浏览器段代码运行的效率，还有另外一个流派的做法，那就是 [asm.js](http://asmjs.org/)，它的实现思路跟 NaCl 完全不一样，并不会在浏览器里执行 Native 代码，因此不会有这么多安全方面的问题需要考虑，而是通过修改 LLVM 的那一套工具链，把 Native 代码编译成 Javascript 的一个子集，运行这个子集的 Javascript 代码。这样的实现最高可以只比 Native 应用慢一倍，虽然不如 NaCl 媲美原生应用，但是也可以接受了。这是 Firefox 浏览器的路子。
 
-#### mbox
+#### Language-Independent Sandboxing
 
-* [Practical and effective sandboxing for non-root users](https://people.csail.mit.edu/nickolai/papers/kim-mbox.pdf)
-* [Open source in GitHub](https://github.com/tsgates/mbox)
+* [Language-Independent Sandboxing of Just-In-Time Compilation and Self-Modifying Code](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.207.6665&rep=rep1&type=pdf)
 
 ```
 // TODO Add the notes
 ```
 
 ## 系统(System)
+
+### 文件系统(File System)
+
+#### Optimistic Crash Consistency
+
+[Optimistic Crash Consistency](http://research.cs.wisc.edu/adsl/Publications/optfs-sosp13.pdf)
+
+这是一篇发表在 SOSP'13 上的论文，主要的工作是在 Ext 4 这样的基于 Journal 来做 Crash Recovery 的文件系统的基础上实现了一种 Optimistic 的 Crash Recovery 的方法，这样的方法能够在保证 Crash Consistency 的同时，大幅度提高性能。但是计算机所有的提高都是 tradeoff 的结果，Optimistic Crash Consistency 是牺牲了数据的 Freshness，也就是新鲜度。
+
+Crash Consistency，就是指文件系统在 Crash 之后，其中的数据还是不是一致的。这里的一致指的是 metadata 和 data 等等数据之间的一致。如果不一致的情况发生了，往往意味着硬盘丢了数据，或者文件系统找不到硬盘上的数据。
+
+在基于 Journal 的文件系统中，一次写入磁盘的操作，要写入的数据有 data，以及在 Journal 中的一份 metadata 的冗余，还有 Journal 中的 commit block，以及最后的 metadata。这四个数据要保证写入顺序才能确保 Crash Consistency。因此要保证数据写入的顺序，就要借助磁盘的 flush 操作，来强制地把数据从磁盘的 cache 刷到真正的磁盘中才行。但是这样会导致很大的性能问题，这篇论文提出了使用 checksums，asynchronous durability notifications，delayed writes 等技术来使得文件系统不需要强制的 flush 操作。但是这样的实现，就会牺牲掉数据的 Freshness，在之前 Ext 4 的实现中，Crash 之后最多丢一个 transaction 的数据，现在可能丢 k 个。但是在性能上比带 flush 的 ext 4 提高了 4-10 倍。
 
 ### 操作系统(Operating System)
 
