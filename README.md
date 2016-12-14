@@ -4,7 +4,7 @@
 
 ## 目录(TOC)
 
-  * [论文笔记](#论文笔记)
+   * [论文笔记](#论文笔记)
       * [目录(TOC)](#目录toc)
       * [分布式(Distributed System)](#分布式distributed-system)
          * [调度器(Scheduler)](#调度器scheduler)
@@ -12,6 +12,10 @@
             * [Omega](#omega)
             * [Borg](#borg)
             * [Yarn](#yarn)
+            * [Sparrow](#sparrow)
+            * [Hawk](#hawk)
+            * [Mercury](#mercury)
+            * [Tarcil](#tarcil)
          * [Lock Service](#lock-service)
             * [Chubby](#chubby)
          * [一致性(Consensus)](#一致性consensus)
@@ -49,12 +53,19 @@
             * [TaintDroid](#taintdroid)
          * [ROP](#rop)
             * [Hacking Blind](#hacking-blind)
+      * [大数据](#大数据)
+         * [框架](#框架)
+            * [Hadoop](#hadoop)
+            * [Spark](#spark)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 ## 分布式(Distributed System)
 
 ### 调度器(Scheduler)
+
+* [Comparison of Container Schedulers](https://medium.com/@ArmandGrillet/comparison-of-container-schedulers-c427f4f7421)
+* [集群调度框架的架构演进之路](http://www.infoq.com/cn/articles/scheduler-architectures)
 
 在我看来，分布式是研究如何让程序能够在多台机器上运行拥有更好的性能的一个方向。那如果要实现这一点，调度很关键。
 
@@ -94,6 +105,42 @@ Borg 的架构其实还挺简单的，是比较经典的 Master/Slave 架构，�
 
 ```
 // TODO Wait to read
+```
+
+#### Sparrow
+
+[Sparrow: Distributed, Low Latency Scheduling](https://people.eecs.berkeley.edu/~keo/publications/sosp13-final17.pdf)
+
+```
+// TODO Add the notes
+```
+
+#### Hawk
+
+[Hawk: Hybrid Datacenter Scheduling](https://www.usenix.org/system/files/conference/atc15/atc15-paper-delgado.pdf)
+* [Hawk in USENIX ATC 2015](https://project.inria.fr/epfl-Inria/files/2016/02/talk-pameladelgado.pdf)
+
+```
+// TODO Add the notes
+```
+
+#### Mercury
+
+* [Mercury: Hybrid Centralized and Distributed Scheduling in Large Shared Clusters
+](https://www.usenix.org/system/files/conference/atc15/atc15-paper-karanasos.pdf)
+* [Mercury in USENIX ATC 2015](https://www.usenix.org/sites/default/files/conference/protected-files/atc15_slides_karanasos.pdf)
+
+```
+// TODO Add the notes
+```
+
+#### Tarcil
+
+* [Tarcil: Reconciling Scheduling Speed and Quality in Large Shared Clusters](http://web.stanford.edu/~cdel/2015.socc.tarcil.pdf)
+* [Tarcil: High Quality and Low Latency Scheduling in Large, Shared Clusters](https://web.stanford.edu/group/mast/cgi-bin/drupal/system/files/2014.techreport.tarcil_0.pdf)
+
+```
+// TODO Add the notes
 ```
 
 ### Lock Service
@@ -187,7 +234,7 @@ Xen 是非常著名的 Hypervisor，它提出了 para-virtualization 的想法�
 
 ## 沙箱(Sandboxing)
 
-* [Sandboxing in Linux: From Smartphone to Cloud](http://www.ijcaonline.org/archives/volume148/number8/borate-2016-ijca-911256.pdf)
+[Sandboxing in Linux: From Smartphone to Cloud](http://www.ijcaonline.org/archives/volume148/number8/borate-2016-ijca-911256.pdf)
 
 沙箱跟容器其实是有点血缘关系的，要做容器肯定要实现隔离，而沙箱就是专门做隔离的。之所以把他们两个分开介绍是因为沙箱本身是一个很复杂的方向，有很多的种类，而容器只是使用了沙箱技术中的某几种。
 
@@ -219,7 +266,7 @@ Janus 的目标有三点，第一个是安全不多说，第二个是灵活，�
 
 #### Ostia
 
-* [Ostia: A Delegating Architecture for Secure System Call Interposition](http://benpfaff.org/papers/ostia.pdf)
+[Ostia: A Delegating Architecture for Secure System Call Interposition](http://benpfaff.org/papers/ostia.pdf)
 
 Ostia 是在 Janus 等等那一溜论文后面发表的，因此引用了 Janus 中提到的那三篇论文。它最大的贡献，在于提出了一种新的架构，然后解决了之前的基于 filter 的架构不能解决的问题。
 
@@ -231,7 +278,7 @@ Ostia 的实现在我看来参考了虚拟化的一些思想，当一个系统�
 
 #### SFI
 
-* [Efficient Software-Based Fault Isolation](https://crypto.stanford.edu/cs155/papers/sfi.pdf)
+[Efficient Software-Based Fault Isolation](https://crypto.stanford.edu/cs155/papers/sfi.pdf)
 
 这篇文章是在 1993 年发表的，也正是这篇文章最早提出了 "sandboxing" 一词。
 
@@ -252,7 +299,7 @@ Google Native Client(NaCl)，简单来说是一个在浏览器里跑 Native 代�
 
 #### Language-Independent Sandboxing
 
-* [Language-Independent Sandboxing of Just-In-Time Compilation and Self-Modifying Code](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.207.6665&rep=rep1&type=pdf)
+[Language-Independent Sandboxing of Just-In-Time Compilation and Self-Modifying Code](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.207.6665&rep=rep1&type=pdf)
 
 ```
 // TODO Add the notes
@@ -325,3 +372,25 @@ Taint 分析，就是指把一些敏感数据标注出来，在程序执行的�
 这篇论文看上去就很酷，实现很让人亮眼。最简单的 ROP，就是寻找一个个的 gadget，然后把 gadget 连接起来。然后让控制流走到这些 gadget 里，就 OK 了。但是这篇论文是如何在远程来劫持控制流，来实现 ROP 攻击。攻击者不了解远程的系统，因此首先系统要有一个已知的 stack overflow 的漏洞，然后要求攻击的进程在死了后会重启，而且 ASLR 后的地址不变。
 
 其实条件是很苛刻的，而且也不懂为什么一个攻击者可以在不了解远程系统的同时知道系统的 stack overflow 漏洞。整体攻击的过程，是先 Dump 服务器的内存，然后再进行常规的 ROP，其中 Dump 内存的操作非常精巧，感觉只有 ROP 高级玩家才能想出这样的做法，具体可以看看上面链接的论文，是我们学院 IPADS 实验室的一个学长写的，很清楚。
+
+## 大数据
+
+### 框架
+
+#### Hadoop
+
+* [MapReduce: Simplified Data Processing on Large Clusters](https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/mapreduce-osdi04.pdf)
+* [The Hadoop Distributed File System](http://pages.cs.wisc.edu/~akella/CS838/F15/838-CloudPapers/hdfs.pdf)
+
+```
+// TODO Wait to read
+```
+
+#### Spark
+
+* [Spark: Cluster Computing with Working Sets](https://people.csail.mit.edu/matei/papers/2010/hotcloud_spark.pdf)
+* [Resilient Distributed Datasets: A Fault-Tolerant Abstraction for In-Memory Cluster Computing](https://www.usenix.org/system/files/conference/nsdi12/nsdi12-final138.pdf)
+
+```
+// TODO Wait to read
+```
