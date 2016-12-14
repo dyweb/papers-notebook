@@ -118,7 +118,7 @@ Borg 的架构其实还挺简单的，是比较经典的 Master/Slave 架构，�
 
 #### Hawk
 
-[Hawk: Hybrid Datacenter Scheduling](https://www.usenix.org/system/files/conference/atc15/atc15-paper-delgado.pdf)
+* [Hawk: Hybrid Datacenter Scheduling](https://www.usenix.org/system/files/conference/atc15/atc15-paper-delgado.pdf)
 * [Hawk in USENIX ATC 2015](https://project.inria.fr/epfl-Inria/files/2016/02/talk-pameladelgado.pdf)
 
 ```
