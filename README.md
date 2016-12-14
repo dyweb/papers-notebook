@@ -109,7 +109,8 @@ Borg 的架构其实还挺简单的，是比较经典的 Master/Slave 架构，�
 
 #### Sparrow
 
-[Sparrow: Distributed, Low Latency Scheduling](https://people.eecs.berkeley.edu/~keo/publications/sosp13-final17.pdf)
+* [Sparrow: Distributed, Low Latency Scheduling](https://people.eecs.berkeley.edu/~keo/publications/sosp13-final17.pdf)
+* [Sparrow in GitHub](https://github.com/radlab/sparrow)
 
 ```
 // TODO Add the notes
