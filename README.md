@@ -112,7 +112,7 @@ Borg 的架构其实还挺简单的，是比较经典的 Master/Slave 架构，�
 * [Sparrow: Distributed, Low Latency Scheduling](https://people.eecs.berkeley.edu/~keo/publications/sosp13-final17.pdf)
 * [Sparrow in GitHub](https://github.com/radlab/sparrow)
 
-Sparrow 是一个与前面的调度器架构都不一样的实现，是去中心化的架构。之前的所有调度器，无论是 monolithic 的还是后面 Mesos 那样两层的架构，都是有一个中心化的调度器在运行，这样的方式会使得调度器的效率不是那么高。 Sparrow 是 AMPLab 的又一力作，发表在 SOSP'13 上，它不是一个 general-purpose 的调度器，而是针对 short job 这一特殊的 workload。其灵感来源于一个负载均衡方面的经典论文，k choices。这篇文章的 idea 是，在 k 台机器里选一个最好的，而不是在 n 里选一个最好的，可以大大降低负载均衡的 overhead，同时也对负载的分配跟最优解差不了多少。、
+Sparrow 是一个与前面的调度器架构都不一样的实现，是去中心化的架构。之前的所有调度器，无论是 monolithic 的还是后面 Mesos 那样两层的架构，都是有一个中心化的调度器在运行，这样的方式会使得调度器的效率不是那么高。 Sparrow 是 AMPLab 的又一力作，发表在 SOSP'13 上，它不是一个 general-purpose 的调度器，而是针对 short job 这一特殊的 workload。其灵感来源于一个负载均衡方面的经典论文，k choices。这篇文章的 idea 是，在 k 台机器里选一个最好的，而不是在 n 里选一个最好的，可以大大降低负载均衡的 overhead，同时也对负载的分配跟最优解差不了多少。
 
 Sparrow 核心的思想就是，在分配 task 的时候，随机选择几个 worker，然后选一个最合适的。因为在 Sparrow 的应用场景里，所有的 task 都是很短的，因此只需要考虑任务队列的长度就差不多了。针对多 task 的分配问题，Sparrow 对其进行了批处理来优化，比如 task 为 2 的时候，不是进行两次选择，每次在 k 个 worker 里选择 1 个，而是在 2k 个 worker 里选择 2 个。
 
@@ -125,9 +125,9 @@ Sparrow 核心的思想就是，在分配 task 的时候，随机选择几个 wo
 * [Hawk: Hybrid Datacenter Scheduling](https://www.usenix.org/system/files/conference/atc15/atc15-paper-delgado.pdf)
 * [Hawk in USENIX ATC 2015](https://project.inria.fr/epfl-Inria/files/2016/02/talk-pameladelgado.pdf)
 
-```
-// TODO Add the notes
-```
+有一种寻找 idea 的方法，就是在已有的两种极端的思想中做一个你中有我，我中有你的取舍，所有计算机的问题，都是 trade off 嘛，两种极端肯定是为了不同的追求，然后提出一个折中的方案，往往是一种取巧的想 idea 的方式。类似的例子有 monolithic kernel，micro kernel 和 hybrid kernel。这篇文章也是这样，它是把去中心化和中心化的调度器做了一个混合。之前提到，去中心化的实现只适合 short job 的 workload，Hawk 在调度 long job 的时候会使用中心化的调度器，在调度 short job 的时候会使用去中心化的调度器。
+
+除此之外，Hawk 为了两者能够更好地在一起工作还做了一些微小的工作，比如在一个 worker 做完所有的事情后，会偷别的 worker 的 short job 来做，果然资本主义的 worker 都是积极进取的。
 
 #### Mercury
 
