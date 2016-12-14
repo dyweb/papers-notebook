@@ -129,6 +129,8 @@ Sparrow 核心的思想就是，在分配 task 的时候，随机选择几个 wo
 
 除此之外，Hawk 为了两者能够更好地在一起工作还做了一些微小的工作，比如在一个 worker 做完所有的事情后，会偷别的 worker 的 short job 来做，果然资本主义的 worker 都是积极进取的。
 
+哦对了，这篇文章的验证是使用谷歌开放的自己的 tracing 数据集来做的，这个数据集也是开源的，在 [https://github.com/google/cluster-data](https://github.com/google/cluster-data) 可以找到。
+
 #### Mercury
 
 * [Mercury: Hybrid Centralized and Distributed Scheduling in Large Shared Clusters
