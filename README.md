@@ -112,9 +112,13 @@ Borg 的架构其实还挺简单的，是比较经典的 Master/Slave 架构，�
 * [Sparrow: Distributed, Low Latency Scheduling](https://people.eecs.berkeley.edu/~keo/publications/sosp13-final17.pdf)
 * [Sparrow in GitHub](https://github.com/radlab/sparrow)
 
-```
-// TODO Add the notes
-```
+Sparrow 是一个与前面的调度器架构都不一样的实现，是去中心化的架构。之前的所有调度器，无论是 monolithic 的还是后面 Mesos 那样两层的架构，都是有一个中心化的调度器在运行，这样的方式会使得调度器的效率不是那么高。 Sparrow 是 AMPLab 的又一力作，发表在 SOSP'13 上，它不是一个 general-purpose 的调度器，而是针对 short job 这一特殊的 workload。其灵感来源于一个负载均衡方面的经典论文，k choices。这篇文章的 idea 是，在 k 台机器里选一个最好的，而不是在 n 里选一个最好的，可以大大降低负载均衡的 overhead，同时也对负载的分配跟最优解差不了多少。、
+
+Sparrow 核心的思想就是，在分配 task 的时候，随机选择几个 worker，然后选一个最合适的。因为在 Sparrow 的应用场景里，所有的 task 都是很短的，因此只需要考虑任务队列的长度就差不多了。针对多 task 的分配问题，Sparrow 对其进行了批处理来优化，比如 task 为 2 的时候，不是进行两次选择，每次在 k 个 worker 里选择 1 个，而是在 2k 个 worker 里选择 2 个。
+
+这篇论文读起来很轻松，idea 比较简单，但是是跟之前完全不一样的思路。讲道理，其实 idea 很容易想，在读 k choices 的时候就想这样的思想能不能用在调度器上，结果人家早就想到了。
+
+目前 Sparrow 开源在 GitHub 上，但是没听说哪个公司在把它用在生产系统上。它的最大的问题就是 workload 比较单一，只能对 short job 有比较好的效果。
 
 #### Hawk
 
