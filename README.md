@@ -287,11 +287,7 @@ Ostia 的实现在我看来参考了虚拟化的一些思想，当一个系统�
 
 [Efficient Software-Based Fault Isolation](https://crypto.stanford.edu/cs155/papers/sfi.pdf)
 
-这篇文章是在 1993 年发表的，也正是这篇文章最早提出了 "sandboxing" 一词。
-
-```
-// TODO Add the notes
-```
+这篇文章是在 1993 年发表的，也正是这篇文章最早提出了 "sandboxing" 一词。这篇文章主要是介绍了用软件方式来实现隔离的方法。传统的隔离是在操作系统这一层来做的，以前进程之间可以通过 RPC 的方式进行，而隔离是通过虚拟内存来实现的。但是这样做的 overhead 特别大，因此这篇文章想实现在同一内存空间内的错误隔离。SFI 的实现，使用了处理器的段寄存器。段寄存器最初是为了解决 Intel 8086 处理器体系架构中数据总线与地址总线的宽度不一致而引入的，因为不一致导致寻址不能在单个指令周期内完成，因此 Intel 引入了段寄存器，将整个内存空间分为了4个段，段寄存器存放每个段的前 N 位的地址，使用段内偏移量，而不是全部的物理地址来描述内存地址，解决了这一问题\footnote{https://en.wikipedia.org/wiki/X86\_memory\_segmentation}。在目前处理器的架构中，不再存在地址宽度不统一的问题，因此内存分段成为了可选的特性。而 SFI 通过对段寄存器的访问限制，将程序的控制流严格地限制在一个 Fault Domain 的代码段中。在进行控制的跳转时，会强制使用段寄存器进行检测，如果访问的地址的前 N 位与段基地址不一致，则会触发异常，说明应用程序正在尝试逃出自己的 Fault Domain。
 
 #### Google Native Client
 
@@ -303,6 +299,8 @@ Ostia 的实现在我看来参考了虚拟化的一些思想，当一个系统�
 Google Native Client(NaCl)，简单来说是一个在浏览器里跑 Native 代码的技术。类比技术是微软<del>臭名昭著</del>的 ActiveX。相比于 ActiveX 那种毫无安全性可言的实现，NaCl 使用了一些自己改良过的 Software Fault Isolation(SFI) 的技术，结合了 ptrace 这样的 System Call Interception 的工具，来实现了在浏览器里安全运行 Native 代码的功能。从实现角度来看，是先对代码进行静态检查，保证代码符合 NaCl 制定的一些规则，然后再把程序运行在一个沙箱内，Native 代码所有跟外界的通讯，包括系统调用，都会被封装或者拦截，使用这样的方式来实现了对 Native 代码的安全隔离。在 2009 年的时候，Google 组织了一个 Native Client Security Contest，鼓励开发者寻找 NaCl 的漏洞，最终发现了 20 多个漏洞但是没有一个可以从根本上破坏 NaCl 的保护。目前 Google Chrome 浏览器仍然支持以这样的方式来运行 Native 代码，只不过好像没有多少人在用的样子。Demo 很容易运行，感兴趣可以试一下，很简单就可以实现从 CPP 代码到 Javascript 代码的通信。
 
 为了提高浏览器段代码运行的效率，还有另外一个流派的做法，那就是 [asm.js](http://asmjs.org/)，它的实现思路跟 NaCl 完全不一样，并不会在浏览器里执行 Native 代码，因此不会有这么多安全方面的问题需要考虑，而是通过修改 LLVM 的那一套工具链，把 Native 代码编译成 Javascript 的一个子集，运行这个子集的 Javascript 代码。这样的实现最高可以只比 Native 应用慢一倍，虽然不如 NaCl 媲美原生应用，但是也可以接受了。这是 Firefox 浏览器的路子。
+
+目前业界有了相对统一的思路，WebAssembly。WebAssembly 跟 asm.js 是相同的路子，得到了各种公司的支持。WebAssembly 由 asm.js 的团队和 NaCl 的团队一起开发，NaCl 的团队更多关注在安全上，这也是他们的特长。因此可以说，Native Client 这个 feature 大概是被抛弃了，但是一些安全的实现，还是由原班人马在为 WebAssembly 做贡献。其实这篇论文的主题也不是说 Native Client 的实现有多好，而是强调它是怎么做到安全的，讲道理这样的实现方式，我觉得是 asm.js 那个流派比较好，因为侵入性小一点。
 
 #### Language-Independent Sandboxing
 
