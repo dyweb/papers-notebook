@@ -73,11 +73,12 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 #### Mesos
 
-[Mesos: A Platform for Fine-Grained Resource Sharing in the Data Center](https://people.eecs.berkeley.edu/~alig/papers/mesos.pdf)
+* [Mesos: A Platform for Fine-Grained Resource Sharing in the Data Center](https://people.eecs.berkeley.edu/~alig/papers/mesos.pdf)
+* [Apache Mesos](https://github.com/apache/mesos)
 
-```
-// TODO Add the notes
-```
+Mesos 是调度器绕不过去的一篇论文，因为它是目前在工业界应用最广泛的开源系统之一。Mesos 跟 exokernel 的思想很像，分离了管理和保护。之前所有的调度器，都是由自己来决定是否把资源给某个任务的，在 mesos 中是 framework 决定是否接受资源的要约。在容灾上，mesos 是通过 zookeeper 做 leader election 的，而且 master 维护的状态是 soft 的，因此 master 没有单点故障的问题，而对于 node 的故障，会反馈给 framework，让他们来处理。Mesos 就像是一个最小的 kernel，所有的决定都是『用户态』的 framework 来做的。
+
+Mesos 是在 node 上给每一个 framework 运行一个 executor 的，使用 Linux Containers 等容器技术来做隔离。最后通过在一个集群上跑多个 framework 的方式来验证 mesos 的可用性。这篇文章整体来说比较简单，也可能是因为听过太多次关于 mesos 的架构了。
 
 #### Omega
 
