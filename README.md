@@ -17,6 +17,9 @@
             * [Hawk](#hawk)
             * [Mercury](#mercury)
             * [Tarcil](#tarcil)
+            * [Eagle](#eagle)
+            * [Canary](#canary)
+            * [Profiling a warehouse-scale computer](#profiling-a-warehouse-scale-computer)
          * [Lock Service](#lock-service)
             * [Chubby](#chubby)
          * [一致性(Consensus)](#一致性consensus)
@@ -32,6 +35,7 @@
             * [kvm](#kvm)
          * [容器(Container)](#容器container)
             * [mbox](#mbox)
+            * [Slacker](#slacker)
       * [沙箱(Sandboxing)](#沙箱sandboxing)
          * [系统调用拦截(System Call Interposition)](#系统调用拦截system-call-interposition)
             * [Janus](#janus)
@@ -159,6 +163,31 @@ Mercury 跟 Hawk 是约等于一模一样的 idea，都是总结了中心化的�
 // TODO Add the notes
 ```
 
+#### Eagle
+
+* [Eagle: A Better Hybrid Data Center Scheduler](https://pdfs.semanticscholar.org/36b3/3a2e5ee77e6b191aa8bfaf4a5aac450d1b57.pdf)
+* [Job-aware Scheduling in Eagle: Divide and Stick to Your Probes](https://infoscience.epfl.ch/record/221125/files/socc2016-final189.pdf)
+
+```
+// TODO Wait to read
+```
+
+#### Canary
+
+* [Canary: A Scheduling Architecture for High Performance Cloud Computing](http://hci.stanford.edu/cstr/reports/2016-01.pdf)
+
+```
+// TODO Wait to read
+```
+
+#### Profiling a warehouse-scale computer
+
+* [Profiling a warehouse-scale computer](http://delivery.acm.org/10.1145/2760000/2750392/p158-kanev.pdf)
+
+```
+// TODO Wait to read
+```
+
 ### Lock Service
 
 #### Chubby
@@ -246,6 +275,14 @@ Xen 是非常著名的 Hypervisor，它提出了 para-virtualization 的想法�
 
 ```
 // TODO Add the notes
+```
+
+#### Slacker
+
+* [Slacker: Fast Distribution with Lazy Docker Containers](https://www.usenix.org/system/files/conference/fast16/fast16-papers-harter.pdf)
+
+```
+// TODO Wait to read
 ```
 
 ## 沙箱(Sandboxing)
