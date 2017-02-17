@@ -13,6 +13,7 @@
             * [Borg](#borg)
             * [Yarn](#yarn)
             * [Sparrow](#sparrow)
+            * [Apollo](#apollo)
             * [Hawk](#hawk)
             * [Mercury](#mercury)
             * [Tarcil](#tarcil)
@@ -121,10 +122,19 @@ Sparrow 核心的思想就是，在分配 task 的时候，随机选择几个 wo
 
 目前 Sparrow 开源在 GitHub 上，但是没听说哪个公司在把它用在生产系统上。它的最大的问题就是 workload 比较单一，只能对 short job 有比较好的效果。
 
+#### Apollo
+
+* [Apollo: Scalable and Coordinated Scheduling for Cloud-Scale Computing](https://www.usenix.org/system/files/conference/osdi14/osdi14-paper-boutin_0.pdf)
+* [Slides in USENIX](https://www.usenix.org/sites/default/files/conference/protected-files/osdi14_slides_boutin.pdf)
+
+```
+// TODO Wait to read
+```
+
 #### Hawk
 
 * [Hawk: Hybrid Datacenter Scheduling](https://www.usenix.org/system/files/conference/atc15/atc15-paper-delgado.pdf)
-* [Hawk in USENIX ATC 2015](https://project.inria.fr/epfl-Inria/files/2016/02/talk-pameladelgado.pdf)
+* [Slides in USENIX ATC 2015](https://project.inria.fr/epfl-Inria/files/2016/02/talk-pameladelgado.pdf)
 
 有一种寻找 idea 的方法，就是在已有的两种极端的思想中做一个你中有我，我中有你的取舍，所有计算机的问题，都是 trade off 嘛，两种极端肯定是为了不同的追求，然后提出一个折中的方案，往往是一种取巧的想 idea 的方式。类似的例子有 monolithic kernel，micro kernel 和 hybrid kernel。这篇文章也是这样，它是把去中心化和中心化的调度器做了一个混合。之前提到，去中心化的实现只适合 short job 的 workload，Hawk 在调度 long job 的时候会使用中心化的调度器，在调度 short job 的时候会使用去中心化的调度器。
 
@@ -136,7 +146,7 @@ Sparrow 核心的思想就是，在分配 task 的时候，随机选择几个 wo
 
 * [Mercury: Hybrid Centralized and Distributed Scheduling in Large Shared Clusters
 ](https://www.usenix.org/system/files/conference/atc15/atc15-paper-karanasos.pdf)
-* [Mercury in USENIX ATC 2015](https://www.usenix.org/sites/default/files/conference/protected-files/atc15_slides_karanasos.pdf)
+* [Slides in USENIX ATC 2015](https://www.usenix.org/sites/default/files/conference/protected-files/atc15_slides_karanasos.pdf)
 
 ```
 // TODO Add the notes
