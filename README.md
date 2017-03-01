@@ -47,6 +47,7 @@
       * [系统(System)](#系统system)
          * [文件系统(File System)](#文件系统file-system)
             * [Optimistic Crash Consistency](#optimistic-crash-consistency)
+            * [F2FS: A New File System for Flash Storage](#f2fs-a-new-file-system-for-flash-storage)
          * [操作系统(Operating System)](#操作系统operating-system)
             * [Exokernel](#exokernel)
          * [CFI](#cfi)
@@ -371,6 +372,16 @@ Google Native Client(NaCl)，简单来说是一个在浏览器里跑 Native 代�
 Crash Consistency，就是指文件系统在 Crash 之后，其中的数据还是不是一致的。这里的一致指的是 metadata 和 data 等等数据之间的一致。如果不一致的情况发生了，往往意味着硬盘丢了数据，或者文件系统找不到硬盘上的数据。
 
 在基于 Journal 的文件系统中，一次写入磁盘的操作，要写入的数据有 data，以及在 Journal 中的一份 metadata 的冗余，还有 Journal 中的 commit block，以及最后的 metadata。这四个数据要保证写入顺序才能确保 Crash Consistency。因此要保证数据写入的顺序，就要借助磁盘的 flush 操作，来强制地把数据从磁盘的 cache 刷到真正的磁盘中才行。但是这样会导致很大的性能问题，这篇论文提出了使用 checksums，asynchronous durability notifications，delayed writes 等技术来使得文件系统不需要强制的 flush 操作。但是这样的实现，就会牺牲掉数据的 Freshness，在之前 Ext 4 的实现中，Crash 之后最多丢一个 transaction 的数据，现在可能丢 k 个。但是在性能上比带 flush 的 ext 4 提高了 4-10 倍。
+
+#### F2FS: A New File System for Flash Storage
+
+[F2FS: A New File System for Flash Storage](https://www.usenix.org/system/files/conference/fast15/fast15-paper-lee.pdf)
+
+随着 NAND Flash 的发展，现在很多持久存储都渐渐地变成了 SSD。之前的文件系统都是针对 HDD 来设计的，因此并没有针对 FLash 存储的一些硬件特性进行优化，而本文则是提出了一个为了 Flash 存储设计的文件系统，现在以及被并入了 Linux Kernel。整篇论文是很多比较偏工程的点拼接起来的，因此读起来不像是其他文件系统的论文那么晦涩。
+
+Flash 存储在读上面的速度众所周知非常快，而且它并不是像 HDD 那样的机械结构，用磁头来进行读写，而是电子的，因此像内存一样拥有一定的并行性。与此同时，在写数据时，Flash 存储并不是 in place 的写入，而是需要写入一个新的地方，然后修改地址使其生效。这一点非常重要，它导致了 “Wandering Tree“ 的问题，这是 Log structured fs 在 SSD 上存在的一个问题：因为 Flash 存储的写是 out of place 的，因此每次写操作都会使得数据块的地址发生变化，所以需要递归地修改 direct block, indirect block 等等一系列块的内容。为了解决这个问题，F2FS 引入了一个新的表：Node Address Table(NAT)。Indirect block 是指向 NAT 的，这样每当一个 data block 被污染的时候，会更新 direct block 和 NAT 中的表项，这样就防止了在 indirect node block 中的传播。
+
+同时为了利用 Flash 存储的并行性，F2FS 采取了 multi-head logging，并不只有一个 log，而是有多个 log，根据数据的更新频率来写 log，这样提高了性能。
 
 ### 操作系统(Operating System)
 
