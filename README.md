@@ -29,6 +29,7 @@
          * [存储(Storage)](#存储storage)
             * [Dynamo](#dynamo)
             * [Spanner](#spanner)
+            * [Ambry](#ambry)
       * [虚拟化(Virtualization)](#虚拟化virtualization)
          * [虚拟机管理器(Hypervisor)](#虚拟机管理器hypervisor)
             * [Xen](#xen)
@@ -245,6 +246,16 @@ Mercury 跟 Hawk 是约等于一模一样的 idea，都是总结了中心化的�
 
 ```
 // TODO Wait to read
+```
+
+#### Ambry
+
+* [Ambry: LinkedIn’s Scalable Geo-Distributed Object Store](http://dprg.cs.uiuc.edu/docs/SIGMOD2016-a/ambry.pdf)
+* [LinkedIn 开源其分布式对象存储系统 Ambry](http://www.infoq.com/cn/news/2016/06/LinkedIn-Ambry)
+* [Slides by me](https://docs.google.com/presentation/d/1o1lkn_QmsDvnHfETHmPUgb-nG3hoRXiXqtn09jAV1XI/edit?usp=sharing)
+
+```
+// TODO Add the notes
 ```
 
 ## 虚拟化(Virtualization)
@@ -465,6 +476,3 @@ Taint 分析，就是指把一些敏感数据标注出来，在程序执行的�
 
 * [Realtime Data Processing at Facebook](http://dblp.org/rec/html/conf/sigmod/ChenWIJLSWWWY16)
 
-```
-// TODO Wait to read
-```
