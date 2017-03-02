@@ -254,9 +254,11 @@ Mercury 跟 Hawk 是约等于一模一样的 idea，都是总结了中心化的�
 * [LinkedIn 开源其分布式对象存储系统 Ambry](http://www.infoq.com/cn/news/2016/06/LinkedIn-Ambry)
 * [Slides by me](https://docs.google.com/presentation/d/1o1lkn_QmsDvnHfETHmPUgb-nG3hoRXiXqtn09jAV1XI/edit?usp=sharing)
 
-```
-// TODO Add the notes
-```
+Ambry 是一个针对 Media 的分布式对象存储系统，是 LinkedIn 做的一项工作。LinkedIn 作为一个社交产品，会有很多媒体数据需要处理，在之前是采取了文件系统存数据，Oracle 存元数据的方法。随着规模的扩大发现不行，于是就有了这个系统。
+
+Ambry 是一个比较中规中矩的分布式系统，比较让人印象深刻的只有一些 threshold。因为社交数据有一个特性：越是冷的数据会越冷，因此 Ambry 针对这个观察做了一些优化，同时在负载均衡上用了 threshold + round-robin 的方式，很 simple 但是效果不错。除此之外在数据存储上有分层的概念在里面，索引是逐层进行的。最上面是 bloom filter，然后是顺序的 segment，最下面是 partition 里真实的数据。
+
+文章很简单，算是很多工程上的点拼在了一起写的论文，有点像最近读的 F2FS，此外 Ambry 感觉也参考了很多文件系统的设计，有一些共性在里面。比如 log structured update 和 journal 等等。
 
 ## 虚拟化(Virtualization)
 
