@@ -16,6 +16,8 @@
             * [Apollo](#apollo)
             * [Hawk](#hawk)
             * [Mercury](#mercury)
+            * [ERA](#era)
+            * [Efficient Queue Management for Cluster Scheduling](#efficient-queue-management-for-cluster-scheduling)
             * [Tarcil](#tarcil)
             * [Eagle](#eagle)
             * [Canary](#canary)
@@ -157,6 +159,22 @@ Sparrow 核心的思想就是，在分配 task 的时候，随机选择几个 wo
 * [Slides in USENIX ATC 2015](https://www.usenix.org/sites/default/files/conference/protected-files/atc15_slides_karanasos.pdf)
 
 Mercury 跟 Hawk 是约等于一模一样的 idea，都是总结了中心化的调度器和去中心化各自的优缺点后，提出了一种 hybrid 的方法。Mercury 是由微软提出的，PPT 做的更好看一些。它在 YARN 上进行了一个实现，Hawk 则是实现在了 Spark 上。说明论文还是有实现有实验才行。
+
+#### ERA
+
+* [ERA: A Framework for Economic Resource Allocation for the Cloud](https://arxiv.org/pdf/1702.07311.pdf)
+
+```
+// TODO Add the notes
+```
+
+#### Efficient Queue Management for Cluster Scheduling
+
+* [Efficient Queue Management for Cluster Scheduling](http://dl.acm.org/citation.cfm?doid=2901318.2901354)
+
+```
+// TODO Add the notes
+```
 
 #### Tarcil
 
