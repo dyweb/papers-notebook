@@ -50,9 +50,12 @@
       * [系统(System)](#系统system)
          * [文件系统(File System)](#文件系统file-system)
             * [Optimistic Crash Consistency](#optimistic-crash-consistency)
-            * [F2FS: A New File System for Flash Storage](#f2fs-a-new-file-system-for-flash-storage)
+            * [F2FS](#f2fs)
+            * [PMFS](#pmfs)
          * [操作系统(Operating System)](#操作系统operating-system)
             * [Exokernel](#exokernel)
+         * [Memory](#memory)
+            * [Transactional Memory](#transactional-memory)
          * [CFI](#cfi)
             * [Control-Flow Integrity](#control-flow-integrity)
       * [安全(Security)](#安全security)
@@ -404,7 +407,7 @@ Crash Consistency，就是指文件系统在 Crash 之后，其中的数据还�
 
 在基于 Journal 的文件系统中，一次写入磁盘的操作，要写入的数据有 data，以及在 Journal 中的一份 metadata 的冗余，还有 Journal 中的 commit block，以及最后的 metadata。这四个数据要保证写入顺序才能确保 Crash Consistency。因此要保证数据写入的顺序，就要借助磁盘的 flush 操作，来强制地把数据从磁盘的 cache 刷到真正的磁盘中才行。但是这样会导致很大的性能问题，这篇论文提出了使用 checksums，asynchronous durability notifications，delayed writes 等技术来使得文件系统不需要强制的 flush 操作。但是这样的实现，就会牺牲掉数据的 Freshness，在之前 Ext 4 的实现中，Crash 之后最多丢一个 transaction 的数据，现在可能丢 k 个。但是在性能上比带 flush 的 ext 4 提高了 4-10 倍。
 
-#### F2FS: A New File System for Flash Storage
+#### F2FS
 
 [F2FS: A New File System for Flash Storage](https://www.usenix.org/system/files/conference/fast15/fast15-paper-lee.pdf)
 
@@ -413,6 +416,15 @@ Crash Consistency，就是指文件系统在 Crash 之后，其中的数据还�
 Flash 存储在读上面的速度众所周知非常快，而且它并不是像 HDD 那样的机械结构，用磁头来进行读写，而是电子的，因此像内存一样拥有一定的并行性。与此同时，在写数据时，Flash 存储并不是 in place 的写入，而是需要写入一个新的地方，然后修改地址使其生效。这一点非常重要，它导致了 “Wandering Tree“ 的问题，这是 Log structured fs 在 SSD 上存在的一个问题：因为 Flash 存储的写是 out of place 的，因此每次写操作都会使得数据块的地址发生变化，所以需要递归地修改 direct block, indirect block 等等一系列块的内容。为了解决这个问题，F2FS 引入了一个新的表：Node Address Table(NAT)。Indirect block 是指向 NAT 的，这样每当一个 data block 被污染的时候，会更新 direct block 和 NAT 中的表项，这样就防止了在 indirect node block 中的传播。
 
 同时为了利用 Flash 存储的并行性，F2FS 采取了 multi-head logging，并不只有一个 log，而是有多个 log，根据数据的更新频率来写 log，这样提高了性能。
+
+#### PMFS
+
+* [System software for persistent memory](http://esos.hanyang.ac.kr/files/courseware/graduate/System_software/a15-dulloor.pdf)
+* [Slides](http://embedded.dankook.ac.kr/~choijm/course/201501TOS/0519_PMFS.pdf)
+
+现在有一种新的概念，Non-volatile Memory（非易失性内存）。它是指通过给内存加电容等等方式来实现内存持久性的一种方式。而也有很多研究是基于此来设计文件系统，这篇文章就是这样的一个文件系统。
+
+很惭愧，这篇文章没怎么听课，也没怎么好好读，不过可以讲讲大致的实现。它最让人印象深刻的地方是在保证 Consistency 的时候，使用了 Hybrid 的方式，综合使用了 COW，Journaling 等等方式。还有就是引入了一个新的硬件 primitive，读的不深就不瞎说了。
 
 ### 操作系统(Operating System)
 
@@ -423,6 +435,30 @@ Flash 存储在读上面的速度众所周知非常快，而且它并不是像 H
 ```
 // TODO Add the notes
 ```
+
+### Memory
+
+#### Transactional Memory
+
+* [Transactional memory: architectural support for lock-free data structures](http://www.cs.utexas.edu/~pingali/CS395T/2009fa/lectures/herlihy93transactional.pdf)
+
+事务性内存已经不是一个新鲜的概念了，从大二以来就一直听说这个词，但一直没有了解过相关的内容。这篇论文是 93 年的，应该是比较老的一篇关于硬件支持事务性内存的论文。而现在在 Intel Haswell 的 CPU 架构中已经有了对事务性内存的支持，但是大家还是有些相关性的。
+
+```c
+// Critical Section
+x=VALIDATE;
+if (x) {
+      COMMIT;
+} else {
+      ABORT;
+}
+```
+
+上面的代码是事务性内存的一个编程范式，原本是使用锁来进行同步，现在所有的操作可以被理解为是一个事务，只有在事务提交的时候才会生效，而如果遇到了冲突则会被 Abort，所有修改完全被 Discard。
+
+文章中在硬件上实现这一点的时候加入了一个新的 L1 Cache，叫做 Tx Cache。它其实是利用了现存的 Cache-coherency Protocol，对于冲突的判断，都是用它来完成的。要理解这篇论文就必须对缓存一致性有比较清楚的认识。而因为实现利用了 Cache，所以在发生 Context Switch 等需要 Flush Cache 的情况下时，事务是一定会被 Abort 的，所以这篇文章的实现主要面向的场景是 short critical section，同时没有 IO 读写。
+
+不过，实现因为是完全基于现有的实现（缓存一致性），因此可以跟非事务性内存的同步操作一起进行，因为其他不在事务中的操作是一样会触发缓存操作的。这算是一个这样实现带来的好处，很关键。
 
 ### CFI
 
