@@ -227,11 +227,12 @@ Mercury 跟 Hawk 是约等于一模一样的 idea，都是总结了中心化的�
 
 #### Raft
 
-[In Search of an Understandable Consensus Algorithm(Extended Version)](https://raft.github.io/raft.pdf)
+* [In Search of an Understandable Consensus Algorithm(Extended Version)](https://raft.github.io/raft.pdf)
+* [Slides](https://speakerdeck.com/benbjohnson/raft-the-understandable-distributed-consensus-protocol)
 
-```
-// TODO Add the notes
-```
+这篇论文是公认的好读，好实现，但是也只是相对于 Paxos 来说的。本身还是具有一定的背景才能读懂的。因为暂时还没正式读过 Paxos，所以不好作比较。但是 Raft 是利用了 State Machine 的思想，将分布式一致性问题分成 Leader 选举和日志同步两个问题，这样的做法很简单粗暴。
+
+我觉得能理解 Raft 是不难的，但是明白听他的正确性是如何保证的才比较难。越是简洁的东西背后的数学证明应该越复杂，并没有了解过。
 
 #### Zookeeper
 
