@@ -213,6 +213,34 @@ Mercury 跟 Hawk 是约等于一模一样的 idea，都是总结了中心化的�
 // TODO Wait to read
 ```
 
+### Graph Computation
+
+#### Wukong
+
+[Fast and Concurrent RDF Queries with RDMA-based Distributed Graph Exploration](http://ipads.se.sjtu.edu.cn/lib/exe/fetch.php?media=publications:wukong-osdi16.pdf)
+
+Wukong 是去中心化的设计，server 可以独立处理请求，每个 server 有两部分，一部分是 query engine，另一部分是 store。
+
+Wukong 一共有两种 index，Type 和 Predicate。
+
+> What are the bottlenecks of existing RDF systems?
+
+一共有两种不同的实现，分别是 Triple store and triple join 和 Graph store and graph exploration。前者是以 triple 的方式来将 RDF 数据存储在关系型数据库中，因此查询有两个步骤，scan 和 join。scan 会分为子查询，最后再借由 hash join 之类的 join 的操作将查询的结果 join 在一起。由此可知如果数据非常大的时候，最后的 join 会是很大的问题。
+
+第二种方式是以图的方式来存储和查询 RDF。这样的方式以 Trinity.RDF 为代表，有一些剪枝的优化。但是最后也会有一个 final join 的过程。
+
+纵观之前的实现，最后的 join 是一个最大的问题。
+
+> What are the differences between Wukong and prior graph-based designs? What are the benefits?
+
+最大的不同在于索引的存储方式。之前的基于图的设计都是用独立的索引数据结构来存索引，但是 Wukong 是把索引同样当做基本的数据结构（点和边）来存储。并且会考虑分区来存储这些索引。
+
+这样做有两个好处，第一点就是在进行图上的遍历或者搜索的时候可以直接从索引的节点开始，不用做额外的操作。第二点是这样使得索引的分布式存储变得非常简单，复用了正常的数据的存储方式。
+
+> What is full-history pruning and what's the difference compared with the prior pruning approach? Why can Wukong adopt full-history pruning?
+
+Full-history 就是说所有的历史记录都会被记录下来。之前是只记录一次的。之所以可以这样做是因为一方面 RDF 的查询都不会有太多步，而且 RDMA 在低于 2K bytes 的时候性能都是差不多的，所以 Wukong 可以这样做。
+
 ### Lock Service
 
 #### Chubby
@@ -457,7 +485,11 @@ if (x) {
 
 上面的代码是事务性内存的一个编程范式，原本是使用锁来进行同步，现在所有的操作可以被理解为是一个事务，只有在事务提交的时候才会生效，而如果遇到了冲突则会被 Abort，所有修改完全被 Discard。
 
-文章中在硬件上实现这一点的时候加入了一个新的 L1 Cache，叫做 Tx Cache。它其实是利用了现存的 Cache-coherency Protocol，对于冲突的判断，都是用它来完成的。要理解这篇论文就必须对缓存一致性有比较清楚的认识。而因为实现利用了 Cache，所以在发生 Context Switch 等需要 Flush Cache 的情况下时，事务是一定会被 Abort 的，所以这篇文章的实现主要面向的场景是 short critical section，同时没有 IO 读写。
+本文是基于嗅探的缓存一致性协议修改来的，文章中在硬件上实现这一点的时候加入了一个新的 L1 Cache，叫做 Tx Cache。因此非事务修改走 regular cache，事务走 Tx Cache。
+
+事务缓存有四个标签，Normal, XCommit, XAbort, Empty。事务提交的时候 XCommit -> Empty, XAbort -> Normal。事务 Abort 的时候，XAbort -> Empty, XCommit -> Normal。
+
+它其实是利用了现存的缓存一致性协议，对于冲突的判断，都是用它来完成的。要理解这篇论文就必须对缓存一致性有比较清楚的认识。而因为实现利用了 Cache，所以在发生 Context Switch 等需要 Flush Cache 的情况下时，事务是一定会被 Abort 的，所以这篇文章的实现主要面向的场景是 short critical section，同时没有 IO 读写。
 
 不过，实现因为是完全基于现有的实现（缓存一致性），因此可以跟非事务性内存的同步操作一起进行，因为其他不在事务中的操作是一样会触发缓存操作的。这算是一个这样实现带来的好处，很关键。
 
@@ -470,6 +502,26 @@ if (x) {
 ```
 // TODO Add the notes
 ```
+
+### Bug
+
+#### STACK
+
+[Towards Optimization-Safe Systems: Analyzing the Impact of Undefined Behavior](https://pdos.csail.mit.edu/papers/stack:sosp13.pdf)
+
+Undefined behavior 是编程语言规范对某段代码可能产生的某些执行结果未定义。Unstable code 就是在程序实际的执行过程中，由于涉及到undefined behavior，从而无法被编译器翻译（直接略过）的代码段。
+
+STACK会在Assumption Δ被允许和不允许的情况下分别模拟编译。
+
+* 先模拟假设不成立的情况进行一次编译；
+* 模拟假设成立的情况进行一次编译；
+* 查看前两步的执行结果有没有区别，有区别的地方就是 unstable code。
+
+如果执行第二步时得不到准确的结果，那么会漏报一些unstable code；如果执行第一步时得不到准确的结果，就会产生误报(false warning / false positive)。目前stack给出的Undefined behavior pattern 可能不齐全。
+
+对于程序员来说，通过fix bug或者去掉一些会被编译器当做是undefined behavior的代码；对于编译器来说，可以集成一些现有的bug-finding的工具，或者利用STACK的方式来判定unstable code；完善编程语言的specification，定义更多的代码执行规则，减少undefined behavior的产生。
+
+STACK为了使可扩展性更高，在计算Δ = ∀e:Reach(e) → ¬Undef(e)的时候做了一些近似运算，使最后得到的结果可能会漏掉一些unstable code。STACK为了简化和滤过某些查询用到的constraint solver如果发生了timeout，也会出现漏报的情况。因此，STACK为了更好的扩展性，牺牲了一定的可靠性（精度）。
 
 ## 安全(Security)
 
