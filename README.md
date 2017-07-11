@@ -4,8 +4,6 @@
 
 ## 目录(TOC)
 
-   * [论文笔记](#论文笔记)
-      * [目录(TOC)](#目录toc)
       * [分布式(Distributed System)](#分布式distributed-system)
          * [调度器(Scheduler)](#调度器scheduler)
             * [Mesos](#mesos)
@@ -22,6 +20,8 @@
             * [Eagle](#eagle)
             * [Canary](#canary)
             * [Profiling a warehouse-scale computer](#profiling-a-warehouse-scale-computer)
+         * [Graph Computation](#graph-computation)
+            * [Wukong](#wukong)
          * [Lock Service](#lock-service)
             * [Chubby](#chubby)
          * [一致性(Consensus)](#一致性consensus)
@@ -29,8 +29,12 @@
             * [Zookeeper](#zookeeper)
             * [Paxos](#paxos)
          * [存储(Storage)](#存储storage)
+            * [BigTable](#bigtable)
             * [Dynamo](#dynamo)
             * [Spanner](#spanner)
+            * [Distributed Transaction with RDMA and HTM](#distributed-transaction-with-rdma-and-htm)
+            * [Key-Value Store with RDMA](#key-value-store-with-rdma)
+            * [RDF Store with RDMA](#rdf-store-with-rdma)
             * [Ambry](#ambry)
       * [虚拟化(Virtualization)](#虚拟化virtualization)
          * [虚拟机管理器(Hypervisor)](#虚拟机管理器hypervisor)
@@ -49,6 +53,7 @@
             * [Language-Independent Sandboxing](#language-independent-sandboxing)
       * [系统(System)](#系统system)
          * [文件系统(File System)](#文件系统file-system)
+            * [RAMCloud](#ramcloud)
             * [Optimistic Crash Consistency](#optimistic-crash-consistency)
             * [F2FS](#f2fs)
             * [PMFS](#pmfs)
@@ -58,6 +63,12 @@
             * [Transactional Memory](#transactional-memory)
          * [CFI](#cfi)
             * [Control-Flow Integrity](#control-flow-integrity)
+         * [Tail Latency](#tail-latency)
+            * [The Tail at Scale](#the-tail-at-scale)
+         * [Lock](#lock)
+            * [Non-scalable locks are dangerous](#non-scalable-locks-are-dangerous)
+         * [Bug](#bug)
+            * [STACK](#stack)
       * [安全(Security)](#安全security)
          * [虚拟机安全(Virtulization, Security)](#虚拟机安全virtulization-security)
             * [CloudVisor](#cloudvisor)
@@ -71,6 +82,9 @@
             * [Spark](#spark)
          * [Data Processing](#data-processing)
             * [Realtime Data Processing at Facebook](#realtime-data-processing-at-facebook)
+      * [网络](#网络)
+         * [Network Function Virtualization(NFV)](#network-function-virtualizationnfv)
+            * [Click](#click)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
@@ -282,6 +296,30 @@ Full-history 就是说所有的历史记录都会被记录下来。之前是只�
 
 ### 存储(Storage)
 
+#### BigTable
+
+[Bigtable: A Distributed Storage System for Structured Data](http://static.googleusercontent.com/media/research.google.com/en//archive/bigtable-osdi06.pdf)
+
+> What is the relationship between table , tablet and sstable?
+
+Table 就是用户可见的表，它有 Row，Column，和不同 Version 的 Value。Table 会从逻辑上划分为多个 Tablet 以方便存储。
+
+Tablet 是一个存储单元。在 BigTable 的架构中，是由一个 Master Server 和多个 Tablet Server 组成的。而 Tablet 这一层抽象有些类似传统数据库概念中的 sharding，跟在 HBase 中的 Region 是差不多的思想。Tablet 的读写是由 Tablet Server 来处理的。
+
+SSTable 是一种文件的格式，全称是 "Sorted Strings Table"，是指按照 Key 的排序在文件中存储 <Key, Value> 对。在逻辑上 SSTable 会包含多个 Block，每个 Block 为了方便寻址会有一个 index，所有的 Block index 会写在 SSTable 文件的最后，每当 SSTable 文件被 open 的时候，会将索引加载到内存里，这样每次 Lookup 的时候只有一次硬盘读取。SSTable 也支持全部读取到内存里，这样在 Lookup 的时候没有任何硬盘的读取。这个跟 HBase 中 HFile 的文件格式实现很相似。
+
+> Describe what will happen when a read operation or write operation arrives.
+
+读取和写入是以 Tablet 作为一个 Unit 进行的。
+
+在进行写操作的时候，Tablet Server 会先做一些检查，保证请求的合法以及权限问题。权限的检查是通过检查一个在 Chubby 中的列表进行的，这个列表会被 Client Library 缓存住。一次被允许的写操作会先进入 Commit Log，在处理 Log 的时候采取了批处理来提高吞吐。在操作被 Commit 后，它的内容会被插入 MemTable 里，当 MemTable 的 size 超过一个阈值的时候，会让当前的 MemTable 进入一个 frozen 的状态，随后创建一个新的 MemTable，Frozen 的 MemTable 就可以以 SSTable 的形式写入 GFS。
+
+在进行读操作的时候，Tablet Server 会在做了一些检查保证合法后，在 MemTable 和 SSTable 的一个 merge 后的 view 中来进行读操作，这样可以保证可以读到最新的值。
+
+> Describe which applications are BigTable suitable for and not suitable for.
+
+BitTable 适合那些对可用性要求比较高的业务场景，同时对于跨行的事务性没有要求的应用。但是正因为没有跨行事务的支持，所以我觉得引用场景很局限。目前在谷歌内部应该也逐渐被 Spanner 和 F1 所取代吧。
+
 #### Dynamo
 
 [Dynamo: Amazon’s Highly Available Key-value Store](http://s3.amazonaws.com/AllThingsDistributed/sosp/amazon-dynamo-sosp2007.pdf)
@@ -294,9 +332,87 @@ Full-history 就是说所有的历史记录都会被记录下来。之前是只�
 
 [Spanner: Google’s Globally-Distributed Database](http://static.googleusercontent.com/media/research.google.com/zh-CN//archive/spanner-osdi2012.pdf)
 
-```
-// TODO Wait to read
-```
+> What is external consistency? What’s the difference between external consistency and serializability?
+
+External consistency 在文中的描述是：如果事务 2 发生在事务 1 提交之后，那事务 2 的时间戳要比事务 1 提交的时间戳要大，也就是 linearizability。
+
+Serializability 是数据库隔离性上的一个级别，这意味着数据库中所有的事务都是可以被序列化来执行的，只有完全没有冲突的事务才可以并发地执行。
+
+External consistency 是一致性上的概念，在分布式场景下，external consistency 是更难做到的，因为时序对时间的精度要求很高，在分布式场景下，有可能出现因为不同机器系统时间不一致导致事务 2 拿到一个比事务 1 提交的时间戳更小的时间戳。
+
+Serializability 是隔离性上的概念，如果做到了 external consistency，就一定可以做到 serializability。
+
+> How does Spanner achieve the external consistency?
+
+Spanner 之前的 Percolator 和 Spanner 都是使用全局的时钟来解决 external consistency 的。但是 Spanner 创新地使用了原子钟和 GPS 来作为全局的时钟，以此来实现 external consistency。
+
+在事务的执行中，Spanner 会保证，每个事务的 commit timestamp 都会在其 start 和 commit 之间。Spanner 依赖的底层容器集群系统 Borg 会维护一个 True Time API，这个 API 会返回精度为 ε 的时间区间 `[t - ε, t + ε]`。因此每个事务会在 start 和 commit 的时候分别调用一次 True Time API，拿到两个时间区间 `[t1 - ε,t1 + ε]` 和 `[t2 - ε,t2 + ε]`，因此在区间 `[t1 + ε,t2 - ε]` 之间的时间都是可用的，如果 t1 和 t2 很接近，那最多需要等 2ε。
+
+> What will happen if the TrueTime assumption is violated? How the authors argue that TrueTime assumption should be correct?
+
+这会导致 True Time API 不能再用来保证 external consistency，文章中提到，CPU 造成的问题比时钟问题多六倍，因此跟硬件造成的错误相比，时钟造成的问题不值一提，可以被视为是值得信任的。
+
+#### Distributed Transaction with RDMA and HTM
+
+[Fast In-memory Transaction Processing using RDMA and HTM, Xingda Wei, Jiaxin Shi, Yanzhe Chen, Rong Chen, Haibo Chen SOSP 2015](https://pdfs.semanticscholar.org/408b/8d34b7467c0b25b27fdafa77ee241ce7f4c4.pdf)
+
+>How does DrTM detect conflicts between remote reads and local writes?
+
+在检测事务的冲突上，DrTM 使用了 HTM 和 RDMA 两种技术，HTM 是一个硬件的特性，在硬件级别提供了有限的事务性内存的支持。RDMA 是 Remote Direct Memory Access，提供了远程直接访问内存，不阻塞 CPU 的操作。
+
+在处理事务冲突时，是在 transaction layer 去做的。对于远程的读和本地的写操作引起的冲突，最简单的方法是用 RMDA 锁住一个 remote record，不管是读还是写。但是这样会大大降低并行性，因此文章进行了一些改进，引入了基于租约的锁，来保证读共享。而在读和本地写产生冲突时，读会通过 RDMA abort 本地的 HTM 事务，从而避免冲突。
+
+> Why DrTM has the deadlock issue and how does it avoid the deadlock?
+
+首先，在 DrTM 的 fallback handler 中，不能像传统的实现那样，一个简单的锁就可以解决问题，而是 fallback handler 通过 2PL，对于任何 record 都是以 remote 的形式进行访问。这里就有可能产生死锁。因为涉及到 remote locks 的顺序。
+
+为了避免这个问题，DrTM 声明了一个全局的释放和申请锁的顺序，避免了死锁的问题。
+
+> What’s the limitation of DrTM?
+
+首先，DrTM 没有做到很好的可用性，这是它最大的局限性。还有就是需要硬件特性的支持，导致在很多现有的硬件上没有办法完全复刻 DrTM 的工作，而需要一些适配性的工作。
+
+#### Key-Value Store with RDMA
+
+[Using One-Sided RDMA Reads to Build a Fast, CPU-Efficient Key-Value Store, Christopher Mitchell, Yifeng Geng, Jinyang Li USENIX ATC 2013](https://www.usenix.org/system/files/conference/atc13/atc13-mitchell.pdf)
+
+> What makes in-memory key-value store systems suitable for RDMA optimization?
+
+因为 In Memory 的 Key-value Store 的大多数请求都是读操作，因此对于 RDMA 来说，这样的特点使得其实现比较简单，只需要对 get 请求做修改就可以了，这样既可以利用 RDMA 的优点，又不需要对系统做过多的修改。
+
+> How does Pilaf ensure the data consistency of 'get' operations? Does it have any problems?
+
+利用了一个『Self verifying』的数据结构，它包括一个 root 和很多 pointer，然后会记录一个 checksum。client 通过检查 checksum 可以检测到读写不一致。当遇到了数据竞争时，client 会自动地进行重试操作。
+
+文中提到有两个应用场景会有问题，一个是在 server 修改 hash table 的时候 client 也在读 hash table，这会导致 client 从不合法的内存地址读取内容。
+
+另外是 client 的指针引用可能非法的。比如当 server 在删除一个 key-value 对的时候，client 自身维护的引用就会已经是失效的。
+
+> Why does Pilaf need two round-trips to perform a 'get' operation? Can we reduce the number of round-trips to one using existing RDMA operations? Why/How?
+
+因为涉及到两次读操作，一次是读哈希表，一次是读真正的 key-value 的内容。可以考虑合并两个内存块，但是这样应该会使得可以存储的空间变小。
+
+#### RDF Store with RDMA
+
+[Fast and Concurrent RDF Queries with RDMA-based Distributed Graph Exploration, Jiaxin Shi, Youyang Yao, Rong Chen, Haibo Chen, Feifei Li OSDI 2016](https://www.usenix.org/system/files/conference/osdi16/osdi16-shi.pdf)
+
+> What are the bottlenecks of existing RDF systems?
+
+一共有两种不同的实现，分别是 Triple store and triple join 和 Graph store and graph exploration。前者是以 triple 的方式来将 RDF 数据存储在关系型数据库中，因此查询有两个步骤，scan 和 join。scan 会分为子查询，最后再借由 hash join 之类的 join 的操作将查询的结果 join 在一起。由此可知如果数据非常大的时候，最后的 join 会是很大的问题。
+
+第二种方式是以图的方式来存储和查询 RDF。这样的方式以 Trinity.RDF 为代表，有一些剪枝的优化。但是最后也会有一个 final join 的过程。
+
+纵观之前的实现，最后的 join 是一个最大的问题。
+
+> What are the differences between Wukong and prior graph-based designs? What are the benefits?
+
+最大的不同在于索引的存储方式。之前的基于图的设计都是用独立的索引数据结构来存索引，但是 Wukong 是把索引同样当做基本的数据结构（点和边）来存储。并且会考虑分区来存储这些索引。
+
+这样做有两个好处，第一点就是在进行图上的遍历或者搜索的时候可以直接从索引的节点开始，不用做额外的操作。第二点是这样使得索引的分布式存储变得非常简单，复用了正常的数据的存储方式。
+
+> What is full-history pruning and what's the difference compared with the prior pruning approach? Why can Wukong adopt full-history pruning?
+
+Full-history 就是说所有的历史记录都会被记录下来。之前是只记录一次的。之所以可以这样做是因为一方面 RDF 的查询都不会有太多步，而且 RDMA 在低于 2K bytes 的时候性能都是差不多的，所以 Wukong 可以这样做。
 
 #### Ambry
 
@@ -426,6 +542,33 @@ Google Native Client(NaCl)，简单来说是一个在浏览器里跑 Native 代�
 
 ### 文件系统(File System)
 
+#### RAMCloud
+
+[Fast Crash Recovery in RAMCloud](http://web.stanford.edu/~ouster/cgi-bin/papers/ramcloud-recovery.pdf)
+
+>Why RAMCloud uses a log-structured strategy for data in DRAM?
+
+RAMCloud 在备份上，没有完全使用内存做备份，而是在内存中有一个备份，在硬盘上也有一个备份。这样的备份策略省了内存，但是造成了两个问题：
+
+* 备份相对慢速，可能会影响系统的正常操作
+* 系统 crash 后恢复要从硬盘中开始，会比较慢
+
+Log-Structured Strategy 就是为了解决第一个问题而采用的。请求到了内存里是以日志的形式记录，随后会将 entry 分发给各个备份，各个备份在收到后会直接返回，然后再处理，约等于实现了异步的操作。因此备份时的 overhead 被 hide 了，但是这样引入了新的问题，可能导致系统 crash 后没有把 buffer flush 到真正的存储中。软件不行硬件来凑，文中提到了两种方法来保证 entry 到了 buffer 中就是持久化的，一种是 DIMM + super-capacitor，一种是加电池。
+
+综上，日志主要是为了解决同步备份的时候因为 hierarchy 产生的性能问题。
+
+>Which policy does RAMCloud use to place segment replicas and how to find the segment replicas during recovery?
+
+以往的实现是中心化的 coordinator，这样会造成性能瓶颈。所以 RAMCloud 采纳了去中心化的思想，利用了随机化和微调的方式，来分散备份。有些类似 k choises 的选择，RAMCloud 会先随机选择一些，然后再从中选出最合适的，并且加入了 reject 的机制来保证在乐观并发的情况下不会产生竞争的问题。同时为了保证尽可能贴近最优解，RAMCloud 考虑了硬盘速度以及硬盘上已经有的 segment 的数量来进行微调，保证尽可能的均匀。
+
+recovery 的时候以往的实现是在 coordinator 里维护一个中心化的表，这样的做法向上面提到的一样会造成瓶颈，因此 RAMCloud 在 recovery 的时候会问所有的备份，备份会返回一个它存储的副本列表，整个过程是并行的而且 RAMCloud 用了自称 fast 的 RPC，因此整个过程不会特别慢。
+
+>Does RAMCloud support random access? If so, please explain how.
+
+支持不支持，支持。
+
+RAMCloud 在每个 master 上都维护有一个哈希表，结构为 `<table identifier, object identifier>`，通过哈希表，可以进行随机的访问。
+
 #### Optimistic Crash Consistency
 
 [Optimistic Crash Consistency](http://research.cs.wisc.edu/adsl/Publications/optfs-sosp13.pdf)
@@ -502,6 +645,44 @@ if (x) {
 ```
 // TODO Add the notes
 ```
+
+### Tail Latency
+
+#### The Tail at Scale
+
+[Dean, Jeffrey, and Luiz André Barroso. "The tail at scale." Communications of the ACM 56.2 (2013): 74-80.](https://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/abstract)
+
+> Why latency variability is amplified by scale?
+
+这是受到系统的特性影响的。在文中给出的例子，是假如一个用户访问一个服务器，99% 的请求是在 10ms 内被处理完的，而有 1% 的请求是在 1s 内被处理的。在这种情况下，针对一个服务器的请求还是可以接受的。但是现在绝大多数应用都是需要多个服务共同服务最后才返回给终端用户的，因此在这样的情况下，用户感知到的延迟是所需要的服务中延迟最大的值。因此，在这样的情况下，用户感知到的延迟是随着系统规模的增大而提高的。这里的 scale 指的是系统的规模。
+
+Please briefly outline some effective tail-tolerant techniques.
+
+比如最简单的，使用多台服务器，处理完全相同的逻辑，用 replica 的方式降低延迟。用户的请求会发送给所有的服务器，当任何一个服务器处理完请求，就返回。这样的方式要求应用要自己处理幂等请求，逻辑也会变得复杂一些。在之上可以做一些优化，比如在一个服务器处理完请求后，通知其他服务器终止对幂等请求的处理等等，不过这样也更加增加了实现的难度。
+
+还有一些减少 daemon 进程的方法比如使用 unikernel 等等更加精简的内核，但是这样的做法成本就更高了。
+
+Why tolerating latency variability for write operations is easier?
+
+因为一般写都是异步的，而且可以容忍一定的不一致。以及在一致性的写上一般都会使用 Paxos, ZAB, raft 之类的算法。而这些算法本身就是 tail tolerant 的。
+
+### Lock
+
+#### Non-scalable locks are dangerous
+
+[Non-scalable locks are dangerous, Silas Boyd-Wickizer, M. Frans Kaashoek, Robert Morris, and Nickolai Zeldovich Proceedings of the Linux Symposium. 2012.](https://www.kernel.org/doc/ols/2012/ols2012-zeldovich.pdf)
+
+>Why does the performance of ticket lock collapse with a small number of cores? (Hint: cache coherence protocol)
+
+在 ticket lock 的实现中，是维护两个 ticket 变量，当前 ticket 和 next ticket。在 unlock 操作中是将当前 ticket 自增从而使得下一个拿到了 ticket 的 core 获取到了锁。
+
+凡是遵循文章中提出的硬件缓存一致性模型的系统，都会遇到 ticket lock 的 rapid collapse。文章提出的硬件缓存一致性模型用目录的方式类比了 CPU 中的缓存，并且用马尔可夫链模型，对 ticket lock 的问题进行了分析。其中每一个节点代表有几个 core 在等的状态，Arrival and Service Rates 分别代表了在不同状态下锁的获得和释放。其中到达率跟在没有在等的 core 的数量 (n - k) 成正比，服务率和在等的 core 的数量 (k) 成反比。所以随着 k 的增大，服务率是减小的。这使得模型得到了一个数学上的结论，锁的获取时间和正在等待锁的 core 的数量是成正比的。
+
+因此随着 core 的增加，在 serial section 很小的时候，Sk = 1/(s + ck/2) 中 k 对 Sk 的贡献越大，因此越容易受到 k 的影响。这也就是为什么，在 serial section 很小的时候，只是多了很少一些在等待锁的 cores，就出现了性能的雪崩。
+
+>Why does MCS lock have better scalability than ticket lock?
+
+在 ticket lock 中，所有的 core 都去依靠同一个变量来获得锁，而在 MCS lock 中，前一个 core 在 release 的时候会修改下一个 core 的 locked 变量，通知下一个 core 来获得锁。这样每个锁都只依靠属于自己的一个变量，这样的实现是缓存一致性无关的，有着更好的 scalability。
 
 ### Bug
 
@@ -585,3 +766,24 @@ Taint 分析，就是指把一些敏感数据标注出来，在程序执行的�
 
 * [Realtime Data Processing at Facebook](http://dblp.org/rec/html/conf/sigmod/ChenWIJLSWWWY16)
 
+## 网络
+
+### Network Function Virtualization(NFV)
+
+#### Click
+
+[The Click modular router, Robert Morris, Eddie Kohler, John Jannotti, M. Frans Kaashoek SOSP 1999](https://pdos.csail.mit.edu/papers/click:tocs00/paper.pdf)
+
+> Why must Click provide both push' andpull' methods? Can we eliminate one of the two operations? How/Why?
+
+Push 和 Pull 是两种连接方式。 Push 是从源 Element 到下游的元素。在 Push 连接方式里，上游的元素会提交一个包到下游的元素。Pull 是从目的地元素到上游元素。在 Pull 的连接方式里，是下游的元素发送包请求到上游的元素。Push 和 Pull的共同使用可以使包转发连接的适当终止，可以很好地解决路由器控制流问题。例如包调度的决定——选择哪个队列去请求一个包对于组合的 Pull 元素来说是非常容易实现的。另外，系统不应该向繁忙的转发接口发送包，否则，这个接口就必须存储包，并且路由器会失去处理这些包的能力（丢弃，修改优先级等）。这个约束可以由简单的给转发接口一个 Pull 输入实现。然后这个接口就可以控制包转发，并且可以在它准备好的时候请求包。
+
+> One limitation of Click is the difficulty of scheduling CPU time among pull and push paths. Why is it difficult? What would you do to improve it?
+
+Click 的调度器就是一个 Pull Element，它有多个输出，而只有一个输入。至于 CPU 时间调度的问题， 是说 Click 没办法处理多个设备同时接收或者发送数据的情况。目前的处理方法是 linux 处理大部分这样的调度，剩下的交由 Click 来做。最终所有这些都应该由一个单一的机制来控制。关于 improve 可以把 linux 里相关的逻辑作为一个 Element 引入，不知是否可行。
+
+> How can batch processing be applied to Click? Be specific and consider the impact on latency and throughput.
+
+APSys 2012 上有一篇论文『The Power of Batching in the Click Modular Router』，它尝试了 psio，netmap，PF_ring 等等开源的 IO batching 的工具，最后选择了 psio。同时为了实现计算的 batching，它修改了现有的 Click。
+
+这样做提高了 throughput，但是加大了 latency。这也跟 batching 的程度有关，理论上来说是可以控制的。
