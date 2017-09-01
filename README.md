@@ -178,6 +178,14 @@ Sparrow 核心的思想就是，在分配 task 的时候，随机选择几个 wo
 
 Mercury 跟 Hawk 是约等于一模一样的 idea，都是总结了中心化的调度器和去中心化各自的优缺点后，提出了一种 hybrid 的方法。Mercury 是由微软提出的，PPT 做的更好看一些。它在 YARN 上进行了一个实现，Hawk 则是实现在了 Spark 上。说明论文还是有实现有实验才行。
 
+#### Firmament
+
+* [Firmament: Fast, Centralized Cluster Scheduling at Scale](https://www.usenix.org/system/files/conference/osdi16/osdi16-gog.pdf)
+* [https://github.com/camsas/firmament](https://github.com/camsas/firmament)
+* [Firmament in Kubernetes](https://github.com/camsas/poseidon)
+
+这是一篇基于最大流最小割的中心化调度的论文，本文是借鉴了 Quincy 的研究，但是在解最大流最小割的时候，做了一些问题特定的优化，解决了 Quincy 不能解决的效率问题。并且 Firmament 会并行地运行两个 MCMF 的算法，来加快其中的过程。它有在 Kubernetes 上的实现。
+
 #### ERA
 
 * [ERA: A Framework for Economic Resource Allocation for the Cloud](https://arxiv.org/pdf/1702.07311.pdf)
