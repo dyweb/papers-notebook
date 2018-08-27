@@ -2,7 +2,7 @@
 
 这个 repo 希望能够记录自己阅读论文的过程，其中的论文一部分来自于上课需要阅读的论文，这部分会比较偏安全和虚拟化。还有一部分论文是自己感兴趣，想去了解的，这部分可能比较偏虚拟化和分布式。论文笔记希望能够记录自己在读论文的时候的想法，其中包括但不限于论文的大致 idea，实现方式，以及自己对论文的评价等等。希望能够把每一篇论文的笔记限制在 1000 字以内。
 
-**目前不再以 Markdown 文件的方式维护，转到 [issue 页面](https://github.com/gaocegege/papers-notebook/issues)进行。**
+**目前不再以 Markdown 文件的方式维护，转到 [issue 页面](https://github.com/gaocegege/papers-notebook/issues)进行，也欢迎到[这个 issue 中](https://github.com/gaocegege/papers-notebook/issues/1)分享您认为值得一读的 paper**
 
 ## 目录(TOC)
 
