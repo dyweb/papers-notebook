@@ -298,9 +298,11 @@ Full-history 就是说所有的历史记录都会被记录下来。之前是只�
 
 #### Paxos
 
-* [Paxos Made Live - An Engineering Perspective](http://static.googleusercontent.com/media/research.google.com/zh-CN//archive/paxos_made_live.pdf)
+* [The Byzantine Generals Problem](http://www.cs.cmu.edu/~15712/papers/lamport82.pdf)
 * [The Part-Time Parliament](http://research.microsoft.com/en-us/um/people/lamport/pubs/lamport-paxos.pdf)
+* [Revisiting the Paxos Algorithm](http://research.microsoft.com/en-us/um/people/blampson/60-PaxosAlgorithm/Acrobat.pdf)
 * [Paxos Made Simple](http://research.microsoft.com/en-us/um/people/lamport/pubs/paxos-simple.pdf)
+* [Paxos Made Live - An Engineering Perspective](http://static.googleusercontent.com/media/research.google.com/zh-CN//archive/paxos_made_live.pdf)
 
 ```
 // TODO Wait to read
